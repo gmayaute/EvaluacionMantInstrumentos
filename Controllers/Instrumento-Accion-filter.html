@@ -1,0 +1,105 @@
+<div>
+    <div id="sidebarFilter" ng-class="{sidebarClass:vm.filterStatus}" ng-click="vm.resetValues()"></div>
+    <aside class="control-sidebar control-sidebar-dark" ng-style="{'min-width': vm.filterWidth} " ng-class="{controlSidebarOpen:vm.filterStatus}">
+
+        <a ng-click="vm.resetValues()" data-toggle="control-sidebar" class="prueba_demo">
+            <p>{{vm.sharedLabels.filteredButtonText}}</p>
+        </a>
+
+        <div class="tab-pane" id="control-sidebar-home-tab" style="padding-left:20px">
+            <div class="text-center" style="padding-top:20px;">
+                <button type="button" class="btn btn-default" ng-click="vm.search()">
+                    {{vm.sharedLabels.searchButtonText}}
+                </button>
+                <button type="button" class="btn btn-default" ng-click="vm.cleanFilter()">
+                    {{vm.sharedLabels.clearButtonText}}
+                </button>
+            </div>
+            <br />
+            <div style="padding-top:20px">
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-6">
+                        <label>{{vm.instrumentoAccionLabels.codigoSbs}}:</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control textbox-clean"
+                               ng-model="vm.currentFilter.codigoSbs"
+                               maxlength="{{vm.customLength.longSbsCode}}"
+                               ng-keyup="vm.currentFilter.codigoSbs = vm.cleanStringOfInvalidCharacters(vm.currentFilter.codigoSbs)" />
+                    </div>
+                </div>
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-6">
+                        <label>{{vm.instrumentoAccionLabels.tipoAccion}}:</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <wj-combo-box 
+                                      ng-model="vm.currentFilter.tipoAccionSelected"
+                                      items-source="vm.tiposAcciones"
+                                      display-member-path="nombreSbsTipoInstrumento"  
+                                      selected-value-path="idTipoInstrumento"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-6">
+                        <label>{{vm.instrumentoAccionLabels.emisor}}:</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <wj-combo-box 
+                                      ng-model="vm.currentFilter.emisorSelected"
+                                      items-source="vm.emisores"
+                                      display-member-path="nombreEntidad"  
+                                      selected-value-path="idEntidad"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-6">
+                        <label>{{vm.instrumentoAccionLabels.moneda}}:</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <wj-combo-box 
+                                      ng-model="vm.currentFilter.monedaSelected"
+                                      items-source="vm.monedas"
+                                      display-member-path="descripcion"  
+                                      selected-value-path="idMoneda"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-6">
+                        <label>{{vm.instrumentoAccionLabels.estado}}:</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <wj-combo-box 
+                                      ng-model="vm.currentFilter.estadoSelected"
+                                      items-source="vm.estados"
+                                      display-member-path="descripcion"  
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-6">
+                        <label>{{vm.instrumentoAccionLabels.habilitacion}}:</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <wj-combo-box 
+                                      ng-model="vm.currentFilter.habilitacionSelected"
+                                      items-source="vm.habilitaciones"
+                                      display-member-path="descripcion"  
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+<div class="control-sidebar-bg"></div>

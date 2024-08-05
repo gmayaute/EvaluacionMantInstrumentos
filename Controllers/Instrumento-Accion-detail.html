@@ -1,0 +1,636 @@
+<div class="modal-header">
+    <div ng-class="vmd.classMercadoPopUp">
+        <h4 class="modal-title" id="modal_nuevo">{{vmd.tittle}} {{vmd.instrumentoAccionLabels.title}}</h4>
+    </div>
+    <div class="col-sm-1" ng-if="vmd.isUpdating">
+        <button type="button" ng-click="vmd.loadPrevius()" data-toggle="tooltip" title="{{vmd.sharedLabels.previousButtonText}}"
+                class="btn_arriba" ng-disabled="vmd.currentItem<=1"></button>
+    </div>
+    <div class="col-sm-1" ng-show="vmd.isUpdating">
+        <div class="lbl_numberRegister">
+            <label>
+                {{vmd.currentItem}}/{{vmd.totalItems}}
+            </label>
+        </div>
+    </div>
+    <div class="col-sm-1" ng-if="vmd.isUpdating">
+        <button type="button" ng-click="vmd.loadNext()" data-toggle="tooltip" title="{{vmd.sharedLabels.nextButtonText}}"
+                class="btn_abajo" ng-disabled="vmd.currentItem>=vmd.totalItems"></button>
+    </div>
+    <div ng-hide="(vmd.operationType == -1)">
+        <div class="col-sm-1" ng-if="!vmd.isRemovingOrAnnulling">
+            <button type="submit" ng-click="vmd.ok()" ng-if="vmd.operationType == 0" data-toggle="tooltip" title="{{vmd.sharedLabels.saveButtonText}}" class="btn_save"
+                    ng-disabled="vmd.isCurrenItemDisabled || vmd.doubleClickDisabled" permission="{{vmd.appSetting.permission.btnPopupGuardarNuevoInstrumentoAccion}}"></button>
+            <button type="submit" ng-click="vmd.ok()" ng-if="vmd.operationType == 1 && !(vmd.isCurrenItemDisabled || vmd.doubleClickDisabled)" data-toggle="tooltip" title="{{vmd.sharedLabels.saveButtonText}}" class="btn_save"
+                    ng-disabled="vmd.isCurrenItemDisabled || vmd.doubleClickDisabled" permission="{{vmd.appSetting.permission.btnPopupGuardarModificarInstrumentoAccion}}"></button>
+            <button type="submit" ng-if="vmd.operationType == 1 && (vmd.isCurrenItemDisabled || vmd.doubleClickDisabled)" data-toggle="tooltip" title="{{vmd.sharedLabels.saveButtonText}}" class="btn_save"
+                    ng-disabled="vmd.isCurrenItemDisabled || vmd.doubleClickDisabled" permission="{{vmd.appSetting.permission.btnPopupGuardarConsultarInstrumentoAccion}}"></button>
+        </div>
+        <div class="col-sm-1" ng-hide="vmd.isRemovingOrAnnulling || vmd.doubleClickDisabled">
+            <button type="submit" class="btn_cerrar" data-dismiss="modal" data-toggle="tooltip" title="{{vmd.sharedLabels.closeButtonText}}" aria-label="Close"
+                    data-ng-click="vmd.close()" aria-hidden="false"></button>
+        </div>
+    </div>
+
+    <div ng-if="(vmd.operationType == -1)">
+        <div class="col-sm-2" ng-if="vmd.isCurrenItemDisabledInelegible">
+            <button type="submit" permission="{{vmd.appSetting.permission.btnPopupHabilitarHabilitacion}}" ng-click="vmd.cambiarEstado(6)" data-toggle="tooltip"
+                    title="{{vmd.sharedLabels.habilitadoText}}" class="btn btn_habilitado">
+                {{vmd.sharedLabels.habilitado}}
+            </button>
+        </div>
+        <div class="col-sm-2" ng-if="vmd.isCurrenItemDisabledHabilitado">
+            <button type="submit" permission="{{vmd.appSetting.permission.btnPopupInhabilitarHabilitacion}}" class="btn btn_inelegible" data-dismiss="modal" data-toggle="tooltip"
+                    title="{{vmd.sharedLabels.inelegibleText}}" data-ng-click="vmd.cambiarEstado(3)">
+                {{vmd.sharedLabels.inelegible}}
+            </button>
+        </div>
+        <div class="col-sm-1">
+            <button type="submit" class="btn_cerrar" data-dismiss="modal" data-toggle="tooltip" title="{{vmd.sharedLabels.closeButtonText}}" aria-label="Close"
+                    data-ng-click="vmd.cancel()" aria-hidden="false"></button>
+        </div>
+    </div>
+
+    <div class="col-sm-3" ng-if="vmd.isRemovingOrAnnulling">
+        <h4 class="modal-title">
+            {{vmd.operationText}}
+        </h4>
+    </div>
+    <div class="col-sm-1" ng-if="vmd.isRemovingOrAnnulling">
+        <button type="submit" ng-click="vmd.ok()" ng-if="vmd.isDeleting"
+                ng-class="{'btn_eliminar':vmd.isDeleting}" class="btn_anular_popUp" data-toggle="tooltip"
+                title="{{vmd.sharedLabels.confirmarButtonText}}" permission="{{vmd.appSetting.permission.btnPopupConfirmarEliminarInstrumentoAccion}}"></button>
+        <button type="submit" ng-click="vmd.ok()" ng-if="!vmd.isDeleting"
+                ng-class="{'btn_eliminar':vmd.isDeleting}" class="btn_anular_popUp" data-toggle="tooltip"
+                title="{{vmd.sharedLabels.confirmarButtonText}}" permission="{{vmd.appSetting.permission.btnPopupConfirmarAnularInstrumentoAccion}}"></button>
+    </div>
+    <div class="col-sm-1" ng-if="vmd.isRemovingOrAnnulling || vmd.doubleClickDisabled">
+        <button type="submit" ng-click="vmd.cancel()" class="btn_cerrar" data-toggle="tooltip" title="{{vmd.sharedLabels.cancelButtonText}}"></button>
+    </div>
+</div>
+
+<div class="modal-body row">
+    <div ng-form="vmd.currentItemForm">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist" style="margin-bottom:20px;">
+            <li role="presentation" class="active"><a data-href="#datos-generales" role="tab" data-toggle="tab">{{vmd.sharedLabels.generalDataTab}}</a></li>
+            <li role="presentation"><a data-href="#informacion-adicional" role="tab" data-toggle="tab">{{vmd.sharedLabels.aditionalInformationTab}}</a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="datos-generales">
+                <!---Fila 1-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>
+                            <label>{{vmd.instrumentoAccionLabels.tipoAccion}}:</label>
+                        </label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.tipoAccion}}" style="width:100%"
+                                      control="vmd.ctrlTiposAcciones"
+                                      wj-validation-error="vmd.isCurrenItemDisabled ? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.idTipoInstrumento == 0)"
+                                      ng-class="(vmd.isRemovingOrAnnulling || vmd.isCurrenItemDisabled || vmd.isUpdating || (vmd.operationType == -1) || vmd.doubleClickDisabled) ? 'textbox-clean' : (vmd.currentInstrumentoAccion.idTipoInstrumento > 0 ? 'wijmo_input_success' : 'wijmo_input_error')"
+                                      ng-change="vmd.changeDescripcion()"
+                                      data-ng-disabled="!vmd.isCreate || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                                      ng-model="vmd.currentInstrumentoAccion.idTipoInstrumento"
+                                      items-source="vmd.tiposAcciones"
+                                      display-member-path="nombreSbsTipoInstrumento"
+                                      selected-value-path="idTipoInstrumento"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.emisor}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.emisor}}"
+                                      control="vmd.ctrlEmisores" style="width:100%"
+                                      wj-validation-error="vmd.isCurrenItemDisabled ? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.idEmisor == 0)"
+                                      ng-class="(vmd.isRemovingOrAnnulling || vmd.isCurrenItemDisabled|| vmd.isUpdating || (vmd.operationType == -1) || vmd.doubleClickDisabled) ? 'textbox-clean' : (vmd.currentInstrumentoAccion.idEmisor > 0 ? 'wijmo_input_success' : 'wijmo_input_error')"
+                                      ng-change="vmd.changeDescripcion()"
+                                      data-ng-disabled="!vmd.isCreate || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                                      ng-model="vmd.currentInstrumentoAccion.idEmisor"
+                                      items-source="vmd.emisores"
+                                      display-member-path="nombreEntidad"
+                                      selected-value-path="idEntidad"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <!--Fila 2-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.descripcion}}:</label>
+                    </div>
+                    <div class="col-sm-10">
+                        <input type="text" name="{{vmd.instrumentoAccionLabels.descripcion}}"
+                               class="form-control wj-control textbox-clean" ng-model="vmd.currentInstrumentoAccion.descripcion" disabled />
+                    </div>
+                </div>
+                <!--Fila 3-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.codigoSbs}}:</label>
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" disabled
+                               class="form-control wj-control textbox-clean"
+                               ng-model="vmd.currentInstrumentoAccion.codigoSbsGenerated" />
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" name="{{vmd.instrumentoAccionLabels.codigoSbs}}"
+                               wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.codigoSbsJoined))"
+                               ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.codigoSbsJoined) ? 'wijmo_input_error' : 'wijmo_input_success')"
+                               ng-disabled="vmd.isRemovingOrAnnulling ? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                               maxlength="{{vmd.customLength.longCode}}"
+                               ng-keyup="vmd.currentInstrumentoAccion.codigoSbsJoined=vmd.cleanStringOfInvalidCharacters(vmd.currentInstrumentoAccion.codigoSbsJoined)"
+                               class="form-control wj-control"
+                               ng-model="vmd.currentInstrumentoAccion.codigoSbsJoined" />
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.nemotecnico}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" name="{{vmd.instrumentoAccionLabels.nemotecnico}}"
+                               wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.nemotecnico))"
+                               ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.nemotecnico) ? 'wijmo_input_error' : 'wijmo_input_success')"
+                               ng-disabled="vmd.isRemovingOrAnnulling ? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                               maxlength="{{vmd.customLength.codeNemotecnico}}"
+                               ng-keyup="vmd.currentInstrumentoAccion.nemotecnico=vmd.cleanStringOfInvalidCharactersFullCharacters(vmd.currentInstrumentoAccion.nemotecnico)"
+                               class="form-control wj-control"
+                               ng-model="vmd.currentInstrumentoAccion.nemotecnico" />
+                    </div>
+                </div>
+                <!--Fila 4-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.codIsin}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" name="{{vmd.instrumentoAccionLabels.codIsin}}"
+                               wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.codIsin))"
+                               ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.codIsin) ? 'wijmo_input_error' : 'wijmo_input_success')"
+                               ng-disabled="vmd.isRemovingOrAnnulling ? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                               maxlength="{{vmd.customLength.longSbsCode}}"
+                               ng-keyup="vmd.currentInstrumentoAccion.codIsin=vmd.cleanStringOfInvalidCharacters(vmd.currentInstrumentoAccion.codIsin)"
+                               class="form-control wj-control"
+                               ng-model="vmd.currentInstrumentoAccion.codIsin" />
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.moneda}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.moneda}}"
+                                      control="vmd.ctrlMonedas" style="width:100%"
+                                      wj-validation-error="vmd.isCurrenItemDisabled ? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.idMoneda == 0)"
+                                      ng-class="(vmd.isRemovingOrAnnulling || vmd.isCurrenItemDisabled || vmd.isUpdating || (vmd.operationType == -1) || vmd.doubleClickDisabled) ? 'textbox-clean' : (vmd.currentInstrumentoAccion.idMoneda > 0 ? 'wijmo_input_success' : 'wijmo_input_error')"
+                                      ng-change="vmd.changeMoneda()"
+                                      data-ng-disabled="!vmd.isCreate || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                                      ng-model="vmd.currentInstrumentoAccion.idMoneda"
+                                      items-source="vmd.monedas"
+                                      display-member-path="monedaCambio"  
+                                      selected-value-path="idMoneda"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <!--Fila 5-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.tipoCustodia}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.tipoCustodia}}"
+                                      control="vmd.ctrlTiposCustodia" style="width:100%"
+                                      wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds ? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.indTipoCustodia == 0)"
+                                      ng-class="(vmd.isRemovingOrAnnulling|| vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled) ||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.currentInstrumentoAccion.indTipoCustodia > 0 ? 'wijmo_input_success' : 'wijmo_input_error')"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling ? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                                      ng-model="vmd.currentInstrumentoAccion.indTipoCustodia"
+                                      items-source="vmd.tiposCustodia"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.dualMoneda}}:</label>
+                    </div>
+                    <div class="col-sm-1">
+                        <div>
+                            <label>
+                                <input type="checkbox" ng-model="vmd.currentInstrumentoAccion.tieneMonedaDual"
+                                       data-ng-disabled="vmd.isRemovingOrAnnulling ||vmd.currentInstrumentoAccion.isAdrAds? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled" class="wj-control" />
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.dualMoneda}}"
+                                      control="vmd.ctrlDualMoneda" style="width:100%"
+                                      wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : (vmd.currentInstrumentoAccion.tieneMonedaDual ? vmd.currentInstrumentoAccion.idMonedaDual == 0 : false))"
+                                      ng-class="((vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (!vmd.currentInstrumentoAccion.tieneMonedaDual)  || (vmd.operationType == -1) || vmd.doubleClickDisabled) ||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.currentInstrumentoAccion.idMonedaDual > 0 ? 'wijmo_input_success' : 'wijmo_input_error'))"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling ? true : (vmd.isCurrenItemDisabled ? true : !vmd.currentInstrumentoAccion.tieneMonedaDual) || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                                      ng-model="vmd.currentInstrumentoAccion.idMonedaDual"
+                                      items-source="vmd.listaDualMoneda"
+                                      display-member-path="monedaCambio"
+                                      selected-value-path="idMoneda"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <!--Fila 6-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.unidades}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.unidades}}"
+                                      control="vmd.ctrlUnidades" style="width:100%"
+                                      wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.indTipoUnidadEmision == 0)"
+                                      ng-class="(vmd.isRemovingOrAnnulling || vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled) ||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.currentInstrumentoAccion.indTipoUnidadEmision > 0 ? 'wijmo_input_success' : 'wijmo_input_error')"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling ? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                                      ng-model="vmd.currentInstrumentoAccion.indTipoUnidadEmision"
+                                      items-source="vmd.unidades"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.valorNominal}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text"
+                               name="{{vmd.instrumentoAccionLabels.valorNominal}}"
+                               style="text-align:right;width:100%;"
+                               class="form-control wj-control"
+                               awnum num-int=15 num-fract=7 num-sep='.' num-pos=true num-neg=false num-thousand=true num-thousand-sep=',' decimal-fixed='7'
+                               ng-model="vmd.currentInstrumentoAccion.valorNominal"
+                               ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled) ||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.currentInstrumentoAccion.valorNominal == 0 ? 'wijmo_input_error' : 'wijmo_input_success')"
+                               wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.valorNominal == 0)"
+                               ng-disabled="vmd.isRemovingOrAnnulling ? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                               maxlength="255" />
+                    </div>
+                </div>
+                <!--Fila 7-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.montoEmitido}}:</label>
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text"
+                               name="{{vmd.instrumentoAccionLabels.montoEmitido}}"
+                               style="text-align:right;width:100%;"
+                               class="form-control wj-control"
+                               awnum num-int=15 num-fract=7 num-sep='.' num-pos=true num-neg=false num-thousand=true num-thousand-sep=',' decimal-fixed='7'
+                               ng-model="vmd.currentInstrumentoAccion.montoEmitido"
+                               ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)? 'textbox-clean' : (vmd.bigNumberNullOrZero(vmd.currentInstrumentoAccion.montoEmitido) ? 'wijmo_input_error' : 'wijmo_input_success')"
+                               wj-validation-error="vmd.isCurrenItemDisabled ? false : (vmd.isRemovingOrAnnulling ? false : vmd.bigNumberNullOrZero(vmd.currentInstrumentoAccion.montoEmitido))"
+                               ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                               maxlength="255" />
+                    </div>
+                    <div class="col-sm-2">
+                        <wj-input-date name="{{vmd.instrumentoAccionLabels.fechaMontoEmitido}}" style="width:100%"
+                                       ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)? 'textbox-clean' : (vmd.currentInstrumentoAccion.fechaMontoEmitido == null ? 'wijmo_input_error' : 'wijmo_input_success')"
+                                       wj-validation-error="vmd.isCurrenItemDisabled ? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.fechaMontoEmitido == 0)"
+                                       data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                                       ng-model="vmd.currentInstrumentoAccion.fechaMontoEmitido"
+                                       value="vmd.currentInstrumentoAccion.fechaMontoEmitido"
+                                       place-holder="dd/MM/yyyy"
+                                       format="dd/MM/yyyy"
+                                       mask="99/99/9999"
+                                       required="false">
+                        </wj-input-date>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.valorNominalSBS}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text"
+                               name="{{vmd.instrumentoAccionLabels.valorNominalSBS}}"
+                               style="text-align:right;width:100%;"
+                               class="form-control wj-control"
+                               awnum num-int=15 num-fract=7 num-sep='.' num-pos=true num-neg=false num-thousand=true num-thousand-sep=',' decimal-fixed='7'
+                               ng-model="vmd.currentInstrumentoAccion.valorNominalSbs"
+                               ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.currentInstrumentoAccion.valorNominalSbs == 0 ? 'wijmo_input_error' : 'wijmo_input_success')"
+                               wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.valorNominalSbs == 0)"
+                               ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                               maxlength="255" />
+                    </div>
+                </div>
+                <!--Fila 8-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.montoColocado}}:</label>
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text"
+                               name="{{vmd.instrumentoAccionLabels.montoColocado}}"
+                               style="text-align:right;width:100%;"
+                               class="form-control wj-control"
+                               awnum num-int=15 num-fract=7 num-sep='.' num-pos=true num-neg=false num-thousand=true num-thousand-sep=',' decimal-fixed='7'
+                               ng-model="vmd.currentInstrumentoAccion.montoColocado"
+                               ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)? 'textbox-clean' : (vmd.bigNumberNullOrZero(vmd.currentInstrumentoAccion.montoColocado) ? 'wijmo_input_error' : 'wijmo_input_success')"
+                               wj-validation-error="vmd.isCurrenItemDisabled ? false : (vmd.isRemovingOrAnnulling ? false : vmd.bigNumberNullOrZero(vmd.currentInstrumentoAccion.montoColocado))"
+                               ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                               maxlength="255" />
+                    </div>
+                    <div class="col-sm-2">
+                        <wj-input-date name="{{vmd.instrumentoAccionLabels.fechaMontoColocado}}" style="width:100%"
+                                       ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)? 'textbox-clean' : (vmd.currentInstrumentoAccion.fechaMontoColocado == null ? 'wijmo_input_error' : 'wijmo_input_success')"
+                                       wj-validation-error="vmd.isCurrenItemDisabled ? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.fechaMontoColocado == null)"
+                                       data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                                       ng-model="vmd.currentInstrumentoAccion.fechaMontoColocado"
+                                       value="vmd.currentInstrumentoAccion.fechaMontoColocado"
+                                       place-holder="dd/MM/yyyy"
+                                       format="dd/MM/yyyy"
+                                       mask="99/99/9999"
+                                       required="false">
+                        </wj-input-date>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.fechaEmision}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-input-date name="{{vmd.instrumentoAccionLabels.fechaEmision}}" style="width:100%"
+                                       wj-validation-error="vmd.isCurrenItemDisabled||vmd.currentInstrumentoAccion.isAdrAds ? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.fechaEmision == null)"
+                                       ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.currentInstrumentoAccion.fechaEmision == null ? 'wijmo_input_error' : 'wijmo_input_success')"
+                                       data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                                       ng-model="vmd.currentInstrumentoAccion.fechaEmision"
+                                       value="vmd.currentInstrumentoAccion.fechaEmisionDate"
+                                       place-holder="dd/MM/yyyy"
+                                       value-changed="vmd.infoFechaInicio(s,e)"
+                                       format="dd/MM/yyyy"
+                                       mask="99/99/9999"
+                                       required="false">
+                        </wj-input-date>
+                    </div>
+                </div>
+                <!--Fila 9-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.unidadesFloat}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text"
+                               name="{{vmd.instrumentoAccionLabels.unidadesFloat}}"
+                               style="text-align:right;width:100%;"
+                               class="form-control wj-control textbox-clean"
+                               awnum num-int=15 num-fract=7 num-sep='.' num-pos=true num-neg=false num-thousand=true num-thousand-sep=',' decimal-fixed='7'
+                               ng-model="vmd.currentInstrumentoAccion.nroUnidadesFloat"
+                               wj-validation-error="false"
+                               ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                               maxlength="255" />
+                    </div>
+                    <div class="col-sm-3">
+                        <label>{{vmd.instrumentoAccionLabels.fechaVencimiento}}:</label>
+                    </div>
+                    <div class="col-sm-1">
+                        <label>
+                            <input type="checkbox" ng-model="vmd.currentInstrumentoAccion.tieneFechaVencimiento" ng-change="vmd.changeFechaVencimiento()"
+                                   data-ng-disabled="vmd.isRemovingOrAnnulling ? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds" class="wj-control" />
+                        </label>
+                    </div>
+                    <div class="col-sm-2">
+                        <wj-input-date name="{{vmd.instrumentoAccionLabels.fechaVencimiento}}" ng-required="false" style="width:100%"
+                                       wj-validation-error="vmd.isCurrenItemDisabled ||vmd.currentInstrumentoAccion.isAdrAds? false : ((vmd.isRemovingOrAnnulling || !vmd.currentInstrumentoAccion.tieneFechaVencimiento ) ? false : vmd.currentInstrumentoAccion.fechaVencimiento == null)"
+                                       ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (!vmd.currentInstrumentoAccion.tieneFechaVencimiento) || (vmd.operationType == -1) || vmd.doubleClickDisabled)||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.currentInstrumentoAccion.fechaVencimiento == null ? 'wijmo_input_error' : 'wijmo_input_success')"
+                                       data-ng-disabled="vmd.isRemovingOrAnnulling ? true : (vmd.isCurrenItemDisabled ? true : !vmd.currentInstrumentoAccion.tieneFechaVencimiento) || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                                       ng-model="vmd.currentInstrumentoAccion.fechaVencimiento"
+                                       value="vmd.currentInstrumentoAccion.fechaVencimiento"
+                                       place-holder="dd/MM/yyyy"
+                                       format="dd/MM/yyyy"
+                                       mask="99/99/9999"
+                                       value-changed="vmd.infoFechaVencimiento(s,e)"
+                                       required="false">
+                        </wj-input-date>
+                    </div>
+                </div>
+                <!--Fila 10-->
+                <div class="form-group col-sm-12">
+                    <div ng-if="vmd.isEditing || vmd.isRemovingOrAnnulling || (vmd.operationType == -1)">
+                        <div class="col-sm-2">
+                            <label>{{vmd.instrumentoAccionLabels.estado}}:</label>
+                        </div>
+                        <div class="col-sm-4">
+                            <wj-combo-box name="{{vmd.instrumentoAccionLabels.estado}}" disabled
+                                          control="vmd.ctrlEstados"
+                                          style="width:100%"
+                                          class="textbox-clean"
+                                          ng-model="vmd.currentInstrumentoAccion.indActividad"
+                                          items-source="vmd.estados"
+                                          display-member-path="descripcion"
+                                          selected-value-path="id"
+                                          is-editable="false">
+                            </wj-combo-box>
+                        </div>
+                    </div>
+                    <div class="col-sm-offset-8">
+                        <label>
+                            <input type="checkbox" style="margin-right: 16px;margin-left:16px;"
+                                   ng-model="vmd.currentInstrumentoAccion.tieneMandato"
+                                   data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                                   class="wj-control">{{vmd.instrumentoAccionLabels.mandato}}
+                        </label>
+                    </div>
+                </div>
+                <!--Fila 11-->
+                <div class="form-group col-sm-12" ng-show="vmd.isUpdating || vmd.isRemovingOrAnnulling  || (vmd.operationType == -1)">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.habilitacion}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.habilitacion}}" disabled
+                                      control="vmd.ctrlHabilitaciones" style="width:100%"
+                                      class="textbox-clean"
+                                      ng-model="vmd.currentInstrumentoAccion.indHabilitacionRiesgo"
+                                      items-source="vmd.habilitaciones"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.comentarioHabilitacion}}:</label>
+                    </div>
+                    <div class="col-sm-4" ng-if="!(vmd.operationType == -1)">
+                        <textarea name="{{vmd.instrumentoAccionLabels.comentarioHabilitacion}}" disabled
+                                  class="form-control wj-control textbox-clean"
+                                  maxlength="{{vmd.customLength.shortDescription}}"
+                                  ng-model="vmd.currentInstrumentoAccion.comentarioHabilitacion"
+                                  rows="4" cols="50"></textarea>
+                    </div>
+                    <div class="col-sm-4" ng-if="(vmd.operationType == -1)">
+                        <textarea class="form-control wj-control"
+                                  maxlength="{{vmd.customLength.shortDescription}}"
+                                  name="{{vmd.instrumentoAccionLabels.comentarioHabilitacion}}"
+                                  wj-validation-error="vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.comentarioHabilitacion)"
+                                  ng-keyup="vmd.currentInstrumentoAccion.comentarioHabilitacion=vmd.cleanStringOfInvalidCharacters(vmd.currentInstrumentoAccion.comentarioHabilitacion)"
+                                  ng-disabled="vmd.isCurrenItemDisabled || vmd.doubleClickDisabled"
+                                  ng-class=" vmd.isCurrenItemDisabled ? 'textbox-clean' : vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.comentarioHabilitacion) ? 'wijmo_input_error' : 'wijmo_input_success'"
+                                  ng-model="vmd.currentInstrumentoAccion.comentarioHabilitacion" rows="4" cols="50"></textarea>
+                    </div>
+                </div>
+                <!--Fila 12-->
+                <div class="form-group col-sm-12" ng-show="vmd.comentarioAnulacionVisibility">
+                    <div class="col-sm-6">
+                        &nbsp;
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.comentarioAnulacion}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <textarea name="{{vmd.instrumentoAccionLabels.comentarioAnulacion}}" class="form-control wj-control"
+                                  wj-validation-error="vmd.isDeleting ? false : ( vmd.isCurrenItemDisabled ? false :  ( vmd.isAnnulling && vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.comentarioAnulacion)))"
+                                  ng-keyup="vmd.currentInstrumentoAccion.comentarioAnulacion = vmd.cleanStringOfInvalidCharacters(vmd.currentInstrumentoAccion.comentarioAnulacion)"
+                                  ng-disabled="vmd.isAnnulling ? false : (vmd.isUpdating ? vmd.isCurrenItemDisabled : true) || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                                  ng-class="vmd.isCurrenItemDisabled ? 'textbox-clean' : vmd.stringIsNullOrEmpty(vmd.currentInstrumentoAccion.comentarioAnulacion) ? 'wijmo_input_error' : 'wijmo_input_success'"
+                                  ng-model="vmd.currentInstrumentoAccion.comentarioAnulacion"
+                                  maxlength="{{vmd.customLength.shortDescription}}" rows="4" cols="50"></textarea>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-sm-offset-2">
+                    <button class="btn" ng-click="vmd.definirAdr()">Definir ADR/ADS</button>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane " id="informacion-adicional">
+                <!--Fila 1-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.clasificacionRiesgoSBS}}:</label>
+                    </div>
+                    <div class="col-sm-4" title="{{vmd.obtenerNombreClasificacion()}}">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.clasificacionRiesgoSBS}}"
+                                      control="vmd.ctrlClasificacionRiesgoSBS" style="width:100%"
+                                      ng-class="(vmd.isRemovingOrAnnulling || (vmd.isCurrenItemDisabled && vmd.isEditing) || (vmd.operationType == -1) || vmd.doubleClickDisabled)? 'textbox-clean' : (vmd.currentInstrumentoAccion.idClasificacionRiesgo > 0 ? 'wijmo_input_success' : 'wijmo_input_error')"
+                                      wj-validation-error="vmd.isCurrenItemDisabled ? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.idClasificacionRiesgo == 0)"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                                      ng-model="vmd.currentInstrumentoAccion.idClasificacionRiesgo"
+                                      items-source="vmd.clasificacionesRiesgoSBS"
+                                      id="clasificacionesRiesgoSBS"
+                                      display-member-path="descripcionClasificacionRiesgo"
+                                      selected-value-path="idClasificacionRiesgo"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.focoGeograficoEmision}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.focoGeograficoEmision}}"
+                                      control="vmd.ctrlFocosGeografico" style="width:100%"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled || vmd.currentInstrumentoAccion.isAdrAds"
+                                      ng-model="vmd.currentInstrumentoAccion.indFocoGeograficoEmision"
+                                      items-source="vmd.focosGeografico"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <!--Fila 2-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.clase}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.clase}}"
+                                      control="vmd.ctrlClases" style="width:100%"
+                                      wj-validation-error="vmd.isCurrenItemDisabled || vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.indClase == 0)"
+                                      ng-class="(vmd.isRemovingOrAnnulling || vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled)||vmd.currentInstrumentoAccion.isAdrAds ? 'textbox-clean' : (vmd.currentInstrumentoAccion.indClase > 0 ? 'wijmo_input_success' : 'wijmo_input_error' )"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled ||vmd.currentInstrumentoAccion.isAdrAds"
+                                      ng-model="vmd.currentInstrumentoAccion.indClase"
+                                      items-source="vmd.clases"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.regionEmision}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.regionEmision}}"
+                                      control="vmd.ctrlRegiones" style="width:100%"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                                      ng-model="vmd.currentInstrumentoAccion.indRegionEmision"
+                                      items-source="vmd.regiones"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <!--Fila 3-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.categoria}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.categoria}}"
+                                      control="vmd.ctrlCategorias" style="width:100%"
+                                      wj-validation-error="vmd.isCurrenItemDisabled || vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.indCategoria == 0)"
+                                      ng-class="(vmd.isRemovingOrAnnulling || vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled) ||vmd.currentInstrumentoAccion.isAdrAds? 'textbox-clean' : (vmd.currentInstrumentoAccion.indCategoria > 0 ? 'wijmo_input_success' :  'wijmo_input_error')"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled ||vmd.currentInstrumentoAccion.isAdrAds"
+                                      ng-model="vmd.currentInstrumentoAccion.indCategoria"
+                                      items-source="vmd.categorias"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.paisEmision}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.paisEmision}}"
+                                      control="vmd.ctrlPaises" style="width:100%"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled"
+                                      ng-model="vmd.currentInstrumentoAccion.indPaisEmisor"
+                                      items-source="vmd.paises"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                </div>
+                <!--Fila 3-->
+                <div class="form-group col-sm-12">
+                    <div class="col-sm-2">
+                        <label>{{vmd.instrumentoAccionLabels.familia}}:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <wj-combo-box name="{{vmd.instrumentoAccionLabels.familia}}"
+                                      control="vmd.ctrlFamilia" style="width:100%"
+                                      wj-validation-error="vmd.isCurrenItemDisabled || vmd.currentInstrumentoAccion.isAdrAds? false : (vmd.isRemovingOrAnnulling ? false : vmd.currentInstrumentoAccion.indFamilia == 0)"
+                                      ng-class="(vmd.isRemovingOrAnnulling || vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled)||vmd.currentInstrumentoAccion.isAdrAds ? 'textbox-clean' : (vmd.currentInstrumentoAccion.indFamilia > 0 ? 'wijmo_input_success' : 'wijmo_input_error')"
+                                      data-ng-disabled="vmd.isRemovingOrAnnulling == true? true : vmd.isCurrenItemDisabled || (vmd.operationType == -1) || vmd.doubleClickDisabled||vmd.currentInstrumentoAccion.isAdrAds"
+                                      ng-model="vmd.currentInstrumentoAccion.indFamilia"
+                                      items-source="vmd.familias"
+                                      display-member-path="descripcion"
+                                      selected-value-path="id"
+                                      is-editable="false">
+                        </wj-combo-box>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label>&nbsp;</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group col-sm-9" ng-if="vmd.isRemovingOrAnnulling || vmd.isEditing  || (vmd.operationType == -1)">
+        <div class="col-sm-12">
+            <h5 class="pull-left"><i>{{vmd.message}} {{vmd.currentInstrumentoAccion.loginActualizacion}}</i></h5>
+        </div>
+        <div class="col-sm-12">
+            <h5 class="pull-left"><i>{{vmd.currentInstrumentoAccion.fechaHora}}</i></h5>
+        </div>
+    </div>
+    <div class="form-group col-sm-3 pull-right">
+        <div style="border-left:5px solid red" ng-if="!vmd.isRemovingOrAnnulling && !vmd.isCurrenItemDisabled" ng-hide="vmd.doubleClickDisabled" class="pull-left">
+            <label style="color:red;padding: 7px 0 0 14px; font-size: 12px;">{{vmd.sharedLabels.requiredFields}} </label>
+        </div>
+    </div>
+</div>

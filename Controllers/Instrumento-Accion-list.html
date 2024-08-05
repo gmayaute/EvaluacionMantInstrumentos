@@ -1,0 +1,127 @@
+<div class="content-wrapper">
+    <section class="content">
+        <div class="col-xs-12 miga_pan">
+            <p ng-style="{'color': vm.appSetting.codigoColor}">
+                {{vm.sharedLabels.mesaDinero}} <span> > {{vm.instrumentoAccionLabels.title}}</span>
+            </p>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading color_panel" ng-style="{'background-color': vm.appSetting.codigoColor}">
+                        <h3 class="panel-title"><i class="fa fa-chevron-right fa-fw"></i> {{vm.instrumentoAccionLabels.title}} </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="pull-left">
+                            <button type="button" class="botones-est btn_nuevo_tm" ng-click="vm.validateOpenModal(0)" permission="{{vm.appSetting.permission.popNuevoInstrumentoAccion}}">
+                                {{vm.sharedLabels.newButtonText}} <any ng-bind="lista.COLOR"></any>
+                            </button>
+                            <button type="button" class="botones-est btn_editar_tm" ng-click="vm.validateOpenModal(1)" permission="{{vm.appSetting.permission.popModificarInstrumentoAccion}}">
+                                {{vm.sharedLabels.editButtonText}}
+                            </button>
+                            <button type="button" class="botones-est btn_eliminar_tm" ng-click="vm.validateOpenModal(2)" permission="{{vm.appSetting.permission.popEliminarInstrumentoAccion}}">
+                                {{vm.sharedLabels.removeButtonText}}
+                            </button>
+                            <button type="button" class="botones-est btn_anular_tm" ng-click="vm.annulItem()" permission="{{vm.appSetting.permission.popAnularInstrumentoAccion}}">
+                                {{vm.sharedLabels.disableButtonText}}
+                            </button>
+                        </div>
+                        <div class="pull-right">
+                            <button type="button" class="botones_derecha btn_pdf" ng-click="vm.exportToPdf();" permission="{{vm.appSetting.permission.btnExportPDFInstrumentoAccion}}"></button>
+                            <button type="button" class="botones_derecha btn_excel" ng-click="vm.exportToExcel();" permission="{{vm.appSetting.permission.btnExportEXCELInstrumentoAccion}}"></button>
+                            <button type="button" class="botones_derecha btn_refresh" ng-click="vm.search();" permission="{{vm.appSetting.permission.btnRefrescarInstrumentoAccion}}"></button>
+                        </div>
+                        <br />
+                        <div class="marco-grid">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <wj-flex-grid items-source="vm.instrumentoAccionCollection" item-formatter="vm.counterFormatter"
+                                                  control="vm.instrumentoAccionFlexGrid" headers-visibility="Column"
+                                                  selection-mode="Row"
+                                                  allow-add-new="false"
+                                                  is-read-only="true"
+                                                  ng-dblclick="vm.loadModal(1,true)"
+                                                  sorting-column="vm.changeOrder(s,e);">
+                                        <wj-flex-grid-column name="codigoSbs" header="{{vm.instrumentoAccionLabels.codigoSbs}}" binding="codigoSbs" is-read-only="true" width="*"></wj-flex-grid-column>
+                                        <wj-flex-grid-column name="nemotecnico" header="{{vm.instrumentoAccionLabels.nemotecnico}}" binding="nemotecnico" is-read-only="true" width="*"></wj-flex-grid-column>
+                                        <wj-flex-grid-column name="tipoAccion" header="{{vm.instrumentoAccionLabels.tipoAccion}}" binding="tipoAccionDescripcion" is-read-only="true" width="*"></wj-flex-grid-column>
+                                        <wj-flex-grid-column name="emisor" header="{{vm.instrumentoAccionLabels.emisor}}" binding="nombreEntidad" is-read-only="true" width="*"></wj-flex-grid-column>
+                                        <wj-flex-grid-column name="codigoISIN" header="{{vm.instrumentoAccionLabels.codIsin}}" binding="codigoIsin" is-read-only="true" width="*"></wj-flex-grid-column>
+                                        <wj-flex-grid-column name="monedaDescripcion" header="{{vm.instrumentoAccionLabels.moneda}}" binding="monedaDescripcion" is-read-only="true" width="*"></wj-flex-grid-column>
+                                        <wj-flex-grid-column name="estadoDescripcion" header="{{vm.instrumentoAccionLabels.estado}}" binding="actividadDescripcion" is-read-only="true" width="*"></wj-flex-grid-column>
+                                        <wj-flex-grid-column name="habilitacionDescripcion" header="{{vm.instrumentoAccionLabels.habilitacion}}" binding="habilitacionRiesgoDescripcion" is-read-only="true" width="170"></wj-flex-grid-column>
+                                    </wj-flex-grid>
+
+                                    <table class="pull-left">
+                                        <tr>
+                                            <td>
+                                                <div class="btn-group" ng-show="vm.pagination.totalPages > 0">
+                                                    <button type="button" data-action="fast-backward" ng-click="vm.getPaged($event);" ng-disabled="vm.pagination.currentPage<=1" class="btn btn_primero"></button>
+                                                    <button type="button" data-action="step-backward" ng-click="vm.getPaged($event);" ng-disabled="vm.pagination.currentPage<=1" class="btn btn_anterior"></button>
+
+                                                    <wj-combo-box style="width:60px;float:left;padding:2px 0"
+                                                                  control="vm.ctrlNumberPages"
+                                                                  ng-model="vm.pagination.currentPage"
+                                                                  ng-change="vm.changePage();"
+                                                                  items-source="vm.numberPages"
+                                                                  is-editable="false">
+                                                    </wj-combo-box>
+                                                    <button type="button" class="btn franja_paginacion" disabled style="width:270px;color:#fff;">
+                                                        {{vm.sharedLabels.pageTotalPagesText.replace('{0}',vm.pagination.totalPages)}} - {{vm.sharedLabels.pageTotalItemsText.replace('{0}',vm.pagination.totalItems)}}
+                                                    </button>
+
+                                                    <button type="button" data-action="step-forward" ng-click="vm.getPaged($event);" ng-disabled="vm.pagination.currentPage>=vm.pagination.totalPages" class="btn btn_siguiente"></button>
+                                                    <button type="button" data-action="fast-forward" ng-click="vm.getPaged($event);" ng-disabled="vm.pagination.currentPage>=vm.pagination.totalPages" class="btn btn_ultimo"></button>
+
+
+                                                    <button type="button" class="btn franja_paginacion" disabled style="width:120px;color:#fff;">
+                                                        <span>{{vm.sharedLabels.pageRowsPerPageText}}</span>
+                                                    </button>
+                                                    <wj-combo-box style="width:80px;float:left;padding:2px 0"
+                                                                  control="vm.ctrlItemsPerPage"
+                                                                  selected-value="vm.pagination.itemsPerPage"
+                                                                  ng-model="vm.pagination.itemsPerPage"
+                                                                  ng-change="vm.changeRowsPerPage();"
+                                                                  items-source="vm.itemsPerPage"
+                                                                  is-editable="false">
+                                                    </wj-combo-box>
+                                                </div>
+                                                <div ng-if="vm.pagination.totalPages == 0">
+                                                    <b>{{vm.sharedLabels.messageNoResultToShow}}</b>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <wj-flex-grid items-source="vm.wijmoCVExportar"
+                                                  headers-visibility="Column"
+                                                  control="vm.wijmoFlexGridExportar"
+                                                  allow-add-new="false"
+                                                  is-read-only="true"
+                                                  ng-show="false">
+                                        <wj-flex-grid-column name="codigoSbs" header="{{vm.instrumentoAccionLabels.codigoSbs}}" binding="codigoSbs" format="f0" is-read-only="true" width="180">
+                                        </wj-flex-grid-column>
+                                        <wj-flex-grid-column name="nemotecnico" header="{{vm.instrumentoAccionLabels.nemotecnico}}" binding="nemotecnico" format="f0" is-read-only="true" width="180">
+                                        </wj-flex-grid-column>
+                                        <wj-flex-grid-column name="tipoAccion" header="{{vm.instrumentoAccionLabels.tipoAccion}}" binding="tipoAccionDescripcion" is-read-only="true" width="170">
+                                        </wj-flex-grid-column>
+                                        <wj-flex-grid-column name="emisor" header="{{vm.instrumentoAccionLabels.emisor}}" binding="nombreEntidad" is-read-only="true" width="170">
+                                        </wj-flex-grid-column>
+                                        <wj-flex-grid-column name="codigoISIN" header="{{vm.instrumentoAccionLabels.codIsin}}" binding="codigoIsin" format="f0" is-read-only="true" width="100">
+                                        </wj-flex-grid-column>
+                                        <wj-flex-grid-column name="monedaDescripcion" header="{{vm.instrumentoAccionLabels.moneda}}" binding="monedaDescripcion" is-read-only="true" width="100">
+                                        </wj-flex-grid-column>
+                                        <wj-flex-grid-column name="estadoDescripcion" header="{{vm.instrumentoAccionLabels.estado}}" binding="actividadDescripcion" is-read-only="true" width="100">
+                                        </wj-flex-grid-column>
+                                        <wj-flex-grid-column name="habilitacionDescripcion" header="{{vm.instrumentoAccionLabels.habilitacion}}" binding="habilitacionRiesgoDescripcion" is-read-only="true" width="170"></wj-flex-grid-column>
+                                    </wj-flex-grid>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<div ng-include="'app/mesadineroApp/instrumentoAccion/instrumento-accion-filter.html'"></div>
